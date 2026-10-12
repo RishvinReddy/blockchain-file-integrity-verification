@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BlockProof verifies file integrity using SHA-256 and a local Ethereum smart contract.">
+  <title>BlockProof — File Integrity Registry</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="BlockProof home"><span class="brand-mark">B</span><span>BLOCKPROOF</span></a>
+    <div class="network"><span class="pulse"></span><span id="network-status">Checking local chain…</span></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">BLOCKCHAIN TECHNOLOGY LABORATORY · MINI PROJECT</p>
+      <h1>Proof of integrity.<br><span>Without the guesswork.</span></h1>
+      <p class="lede">Register a file’s SHA-256 fingerprint on a local Ethereum network. Verify it later without putting the file itself on-chain.</p>
+      <div class="hero-tags"><span>SHA-256</span><span>Solidity</span><span>Web3.js</span><span>Local Ethereum</span></div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="panel-heading"><div><p class="eyebrow">01 / REGISTER</p><h2>Register a file</h2></div><span class="step">01</span></div>
+        <p class="muted">Create an on-chain reference for the file’s current contents.</p>
+        <label class="dropzone" for="register-file"><span class="upload-icon">↑</span><strong>Choose a file</strong><span>Maximum 10 MB · File remains off-chain</span><input id="register-file" type="file"></label>
+        <button id="register-btn" class="button primary" disabled>Calculate hash &amp; register <span>↗</span></button>
+        <div id="register-result" class="result" aria-live="polite"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading"><div><p class="eyebrow">02 / VERIFY</p><h2>Verify a file</h2></div><span class="step">02</span></div>
+        <p class="muted">Compare a file’s current fingerprint with the blockchain registry.</p>
+        <label class="dropzone" for="verify-file"><span class="upload-icon">⌕</span><strong>Choose a file to verify</strong><span>Original file or a suspected modification</span><input id="verify-file" type="file"></label>
+        <button id="verify-btn" class="button secondary" disabled>Verify integrity <span>→</span></button>
+        <div id="verify-result" class="result" aria-live="polite"></div>
+      </article>
+    </section>
+
+    <section class="panel records-panel">
+      <div class="panel-heading"><div><p class="eyebrow">03 / LEDGER</p><h2>Recent registrations</h2></div><button id="refresh-btn" class="text-button">Refresh ↻</button></div>
+      <p class="muted">Most recent records returned by the deployed smart contract.</p>
+      <div class="table-wrap"><table><thead><tr><th>SHA-256 DIGEST</th><th>REGISTERED BY</th><th>BLOCKCHAIN TIME</th></tr></thead><tbody id="records-body"><tr><td colspan="3" class="empty">Connect the local chain to load records.</td></tr></tbody></table></div>
+    </section>
+
+    <footer><span>BLOCKPROOF / LABORATORY EDITION</span><span>File contents stay off-chain by design.</span></footer>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>
