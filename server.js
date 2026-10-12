@@ -140,6 +140,35 @@ app.post("/api/verify", upload.single("file"), async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
+app.get("/api/records", async (_req, res, next) => {
+  try {
+    const contract = loadContract();
+    const count = Number(await contract.methods.getRecordCount().call());
+    const records = [];
+    // Bound the response to keep this demo endpoint predictable.
+    const start = Math.max(0, count - 100);
+    for (let i = count - 1; i >= start; i--) {
+      const item = await contract.methods.getRecordAt(i).call();
+      records.push({
+        hash: String(item[0]).replace(/^0x/, ""),
+        registeredBy: item[1],
+        timestamp: String(item[2]),
+        exists: Boolean(item[3])
+      });
+    }
+    res.json({ total: count, records });
+  } catch (error) { next(error); }
+});
+
+app.use((error, _req, res, _next) => {
+  if (error instanceof multer.MulterError) {
+    const status = error.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+    return res.status(status).json({ error: error.code === "LIMIT_FILE_SIZE" ? "File exceeds the 10 MB limit." : "Invalid upload." });
+  }
+  const status = Number(error.status) || 500;
+  res.status(status).json({ error: status >= 500 ? error.message : error.message });
+});
+
 app.listen(PORT, () => {
   console.log(`BlockProof running at http://localhost:${PORT}`);
   console.log(`RPC endpoint: ${RPC_URL}`);
