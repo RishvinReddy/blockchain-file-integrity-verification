@@ -34,6 +34,15 @@ function sha256(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
+function asBytes32(hexDigest) {
+  if (!/^[0-9a-f]{64}$/i.test(hexDigest)) {
+    const err = new Error("Invalid SHA-256 digest.");
+    err.status = 400;
+    throw err;
+  }
+  return `0x${hexDigest.toLowerCase()}`;
+}
+
 function loadContract() {
   if (!fs.existsSync(DEPLOYMENT_FILE)) {
     const err = new Error("Contract deployment not found. Run npm run compile and npm run deploy:local first.");
@@ -86,6 +95,49 @@ app.post("/api/hash", upload.single("file"), (req, res) => {
     algorithm: "SHA-256",
     hash: sha256(req.file.buffer)
   });
+});
+
+app.post("/api/register", upload.single("file"), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "Select a file first." });
+    const digest = sha256(req.file.buffer);
+    const contract = loadContract();
+    const sender = await getSender();
+    const receipt = await contract.methods.registerFile(asBytes32(digest)).send({ from: sender, gas: 250000 });
+    res.status(201).json({
+      result: "registered",
+      filename: path.basename(req.file.originalname),
+      sizeBytes: req.file.size,
+      algorithm: "SHA-256",
+      hash: digest,
+      registeredBy: sender,
+      transactionHash: receipt.transactionHash,
+      blockNumber: Number(receipt.blockNumber)
+    });
+  } catch (error) { next(error); }
+});
+
+app.post("/api/verify", upload.single("file"), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "Select a file first." });
+    const digest = sha256(req.file.buffer);
+    const contract = loadContract();
+    const result = await contract.methods.getRecord(asBytes32(digest)).call();
+    const exists = Boolean(result[3]);
+    res.json({
+      result: exists ? "match" : "not_registered",
+      filename: path.basename(req.file.originalname),
+      sizeBytes: req.file.size,
+      algorithm: "SHA-256",
+      hash: digest,
+      registered: exists,
+      registeredBy: exists ? result[1] : null,
+      timestamp: exists ? String(result[2]) : null,
+      explanation: exists
+        ? "The file's SHA-256 digest matches a record in the registry."
+        : "No record exists for this file's SHA-256 digest. It may be new or different from a registered file."
+    });
+  } catch (error) { next(error); }
 });
 
 app.listen(PORT, () => {
