@@ -39,7 +39,7 @@ Keep this terminal running. The Hardhat node uses chain ID `31337` and prints de
 
 **Terminal 2 — compile and deploy**
 ```bash
-cd path/to/BlockProof_Submission/project
+cd blockchain-file-integrity-verification
 npm install
 npm run compile
 npm run deploy:local
@@ -48,7 +48,7 @@ The deploy script writes the deployed address and ABI to `deployment/local.json`
 
 **Terminal 3 — start the application**
 ```bash
-cd path/to/BlockProof_Submission/project
+cd blockchain-file-integrity-verification
 npm start
 ```
 Open `http://localhost:3000`.
